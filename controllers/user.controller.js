@@ -1,0 +1,59 @@
+const NotFoundError = require("../errors/not-found");
+const userService = require("../services/user.service");
+
+class UserController {
+  async getAllUsers(req, res, next) {
+    try {
+      const users = await userService.getAll();
+      res.json(users);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getUserByID(req, res, next) {
+    try {
+      const id = req.params.id;
+      const user = await userService.get(id);
+      if (!user) {
+        throw new NotFoundError();
+      }
+      res.json(user);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async createUser(req, res, next) {
+    try {
+      const user = await userService.create(req.body);
+      user.password = undefined;
+      res.status(201).json(user);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async updateUser(req, res, next) {
+    try {
+      const id = req.params.id;
+      const data = req.body;
+      const userUpdated = await userService.update(id, data);
+      res.json(userUpdated);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async deleteUser(req, res, next) {
+    try {
+      const id = req.params.id;
+      await userService.delete(id);
+      res.status(204).send();
+    } catch (err) {
+      next(err);
+    }
+  }
+}
+
+module.exports = new UserController();
