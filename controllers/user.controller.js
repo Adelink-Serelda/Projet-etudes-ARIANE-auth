@@ -1,5 +1,8 @@
 const NotFoundError = require("../errors/not-found");
+const UnauthorizedError = require("../errors/unauthorized");
 const userService = require("../services/user.service");
+const jwt = require("jsonwebtoken");
+const config = require("../config/index");
 
 class UserController {
   async getAllUsers(req, res, next) {
@@ -50,6 +53,25 @@ class UserController {
       const id = req.params.id;
       await userService.delete(id);
       res.status(204).send();
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async login(req, res, next) {
+    try {
+      const { email, password } = req.body;
+      const userId = await userService.checkPasswordUser(email, password);
+      if (!userId) {
+        throw new UnauthorizedError();
+      }
+      const token = jwt.sign({ userId }, config.secretJwtToken, {
+        expiresIn: "3d",
+      });
+      res.json({
+        token,
+      });
+      console.log("token :", token);
     } catch (err) {
       next(err);
     }

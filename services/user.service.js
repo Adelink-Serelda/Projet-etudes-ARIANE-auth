@@ -1,4 +1,5 @@
 const User = require("../models/user.model");
+const bcrypt = require("bcrypt");
 
 class UserService {
   getAll() {
@@ -20,6 +21,19 @@ class UserService {
 
   delete(id) {
     return User.deleteOne({ _id: id });
+  }
+
+  async checkPasswordUser(email, password) {
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ email: normalizedEmail });
+    if (!user) {
+      return false;
+    }
+    const mdpCompare = await bcrypt.compare(password, user.password);
+    if (!mdpCompare) {
+      return false;
+    }
+    return user._id;
   }
 }
 
