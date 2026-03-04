@@ -33,7 +33,7 @@ class UserService {
     if (!mdpCompare) {
       return false;
     }
-    return user._id;
+    return user;
   }
 }
 

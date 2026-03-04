@@ -62,13 +62,24 @@ class UserController {
   async login(req, res, next) {
     try {
       const { email, password } = req.body;
-      const userId = await userService.checkPasswordUser(email, password);
-      if (!userId) {
+
+      const user = await userService.checkPasswordUser(email, password);
+      if (!user) {
         throw new UnauthorizedError();
       }
-      const token = jwt.sign({ userId }, config.secretJwtToken, {
-        expiresIn: "3d",
-      });
+      const token = jwt.sign(
+        {
+          id: user._id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+        },
+        config.secretJwtToken,
+        {
+          expiresIn: "3d",
+        },
+      );
       res.json({
         token,
       });
